@@ -1,0 +1,44 @@
+{
+  "Comment": "Pipeline completo - Câmara dos Deputados",
+  "StartAt": "ExtrairDadosGerais",
+  "States": {
+    "ExtrairDadosGerais": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:xxxxxxxxxxxx:function:extrairDadosCamara",
+        "Payload.$": "$"
+      },
+      "ResultSelector": {
+        "statusCode.$": "$.Payload.statusCode",
+        "ids.$": "$.Payload.ids"
+      },
+      "ResultPath": "$",
+      "Next": "IterarDespesas"
+    },
+    "IterarDespesas": {
+      "Type": "Map",
+      "ItemsPath": "$.ids",
+      "MaxConcurrency": 5,
+      "Iterator": {
+        "StartAt": "ColetarDespesas",
+        "States": {
+          "ColetarDespesas": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:xxxxxxxxxxx:function:coletarDespesasDeputado",
+            "End": true
+          }
+        }
+      },
+      "Next": "TransformarEmParquet"
+    },
+    "TransformarEmParquet": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "despesas_json_to_parquet"
+      },
+      "End": true
+    }
+  }
+}
