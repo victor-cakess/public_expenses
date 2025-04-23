@@ -32,30 +32,30 @@ def save_to_s3(data, folder, filename_prefix):
 def lambda_handler(event, context):
     try:
         # 1. Extrai /deputados e grava idempotente
-        print("🔎 Ingerindo /deputados")
+        print("Ingerindo /deputados")
         deputados_data = fetch_json("https://dadosabertos.camara.leg.br/api/v2/deputados")
         save_to_s3(deputados_data, "deputados", "deputados")
         deputados_ids = [d['id'] for d in deputados_data['dados']]
 
         # 2. Extrai /proposicoes e grava idempotente
-        print("🔎 Ingerindo /proposicoes")
+        print("Ingerindo /proposicoes")
         proposicoes_data = fetch_json("https://dadosabertos.camara.leg.br/api/v2/proposicoes?dataInicio=2024-01-01")
         save_to_s3(proposicoes_data, "proposicoes", "proposicoes")
 
         # 3. Extrai /votacoes e grava idempotente
-        print("🔎 Ingerindo /votacoes")
+        print("Ingerindo /votacoes")
         votacoes_data = fetch_json("https://dadosabertos.camara.leg.br/api/v2/votacoes")
         save_to_s3(votacoes_data, "votacoes", "votacoes")
 
         # Retorna IDs para Step Functions
-        print("🔎 IDs extraídos:", deputados_ids)
+        print("IDs extraídos:", deputados_ids)
         return {
             'statusCode': 200,
             'ids': deputados_ids
         }
 
     except Exception as e:
-        print("❌ Erro na execução da Lambda:")
+        print("Erro na execução da Lambda:")
         print(traceback.format_exc())
         return {
             'statusCode': 500,
